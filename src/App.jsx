@@ -47,10 +47,6 @@ const MapWithAMarker = compose(
           const places = refs.searchBox.getPlaces();
           const bounds = new google.maps.LatLngBounds();
 
-          // this.setState( places => {
-          //   const markers = places.markers.push(places);
-          // })
-
           places.forEach(place => {
             if (place.geometry.viewport) {
               bounds.union(place.geometry.viewport)
@@ -60,9 +56,10 @@ const MapWithAMarker = compose(
           });
           const nextMarkers = places.map(place => ({
             position: place.geometry.location,
+            id: place.id,
           }));
           const nextCenter = _.get(nextMarkers, '0.position', this.state.center);
-          
+
           this.setState({
             center: nextCenter,
             markers: nextMarkers,
@@ -70,10 +67,17 @@ const MapWithAMarker = compose(
 
            refs.map.fitBounds(bounds);
         },
+        onRemoveMarker: id => {
+          this.setState(state => {
+            const markers = state.markers.filter(marker => marker.id !== id);
+            return {
+              markers,
+            };
+          });
+        }
       },
       )
     },
-    
   }),
   withScriptjs, withGoogleMap)(props => {
   return (
@@ -130,7 +134,6 @@ const MapWithAMarker = compose(
             ref={props.onMarkerMounted}
             key={marker.id}
             onClick={onClick}
-            // position={{ lat: marker.latitude, lng: marker.longitude }}
             position={marker.position}
           >
           </Marker>
@@ -139,6 +142,17 @@ const MapWithAMarker = compose(
       // <Marker key={index} position={marker.position} />
     )}
     </GoogleMap>
+    {props.markers.map((marker, index) => (
+          <li>
+          <ul>{marker.position.lat()}</ul>
+          <button
+          type="button"
+          onClick={(index) => props.onRemoveMarker(marker.id)}
+        >
+          Remove
+        </button>
+        </li>
+        ))}
     </div>
   )
 })
