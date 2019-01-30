@@ -1,0 +1,45 @@
+{
+    "name": "route-editor",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "react": "^16.7.0",
+        "react-dom": "^16.7.0",
+        "react-scripts": "2.1.3",
+        "recompose": "0.26.0"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+        "extends": "react-app"
+    },
+    "browserslist": [
+        ">0.2%",
+        "not dead",
+        "not ie <= 11",
+        "not op_mini all"
+    ],
+    "devDependencies": {
+        "google-map-react": "^1.1.2",
+        "google-maps-react": "^2.0.2",
+        "lodash.isempty": "^4.4.0",
+        "mobx": "^5.9.0",
+        "mobx-react": "^5.4.3",
+        "react-compose": "^2.0.0",
+        "react-geocode": "^0.1.2",
+        "react-google-autocomplete": "^1.0.18",
+        "react-google-map": "^3.1.1",
+        "react-google-maps": "^9.4.5",
+        "react-google-maps-loader": "^4.2.3",
+        "react-helmet": "^5.2.0",
+        "react-pure-render": "^1.0.2",
+        "react-router-dom": "^4.3.1",
+        "recompose": "^0.26.0",
+        "redux": "^4.0.1",
+        "styled-components": "^4.1.3"
+    }
+}
