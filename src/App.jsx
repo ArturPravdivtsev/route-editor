@@ -30,7 +30,7 @@ const MapWithAMarker = compose(
         center: {
           lat: 41.9, lng: -87.624
         },
-        //markers: [],
+        nexttMarkers: [],
         onMapMounted: ref => {
           refs.map = ref;
         },
@@ -59,10 +59,10 @@ const MapWithAMarker = compose(
             id: place.id,
           }));
           const nextCenter = _.get(nextMarkers, '0.position', this.state.center);
-
+          this.state.nexttMarkers = nextMarkers.concat(this.state.nexttMarkers)
           this.setState({
             center: nextCenter,
-            markers: nextMarkers,
+            markers: this.state.nexttMarkers,
           });
 
            refs.map.fitBounds(bounds);
