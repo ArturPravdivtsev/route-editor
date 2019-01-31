@@ -1,5 +1,6 @@
 /* global google*/
 import React, { Component } from "react";
+import Geocode from "react-geocode";
 const _ = require("lodash");
 const { compose, withProps, lifecycle } = require("recompose");
 const {
@@ -10,16 +11,6 @@ const {
   InfoWindow
 } = require("react-google-maps");
 const { SearchBox } = require("react-google-maps/lib/components/places/SearchBox");
-// import React, { Component, Fragment } from "react";
-// import { compose } from "recompose";
-// import {
-//   withScriptjs,
-//   withGoogleMap,
-//   GoogleMap,
-//   Marker,
-//   InfoWindow
-// } from "react-google-maps";
-
 
 const MapWithAMarker = compose(
   lifecycle({
@@ -64,7 +55,6 @@ const MapWithAMarker = compose(
             center: nextCenter,
             markers: this.state.nexttMarkers,
           });
-
            refs.map.fitBounds(bounds);
         },
         onRemoveMarker: id => {
@@ -74,7 +64,32 @@ const MapWithAMarker = compose(
               markers,
             };
           });
-        }
+        },
+
+        /* @param event */
+
+        onMarkerDragEnd: ( id, e ) => {
+           let newLat = e.latLng.lat(),
+             newLng = e.latLng.lng();
+          //let position = e.latLng.toString();
+            //console.log(position)
+              const index = this.state.markers.findIndex((marker) => {
+                return marker.id === id
+              });
+              //console.log(index)
+              const marker = Object.assign({}, this.state.markers[index]);
+              //console.log(marker.position.lat())
+              //marker.position = position;
+              marker.position = new google.maps.LatLng(newLat, newLng)
+              console.log(marker)
+              const markers = Object.assign([], this.state.markers);
+              console.log(markers[index])
+              markers[index] = marker;
+              console.log(markers[index])
+              this.setState({
+                markers: markers
+              } )
+        },
       },
       )
     },
@@ -135,6 +150,8 @@ const MapWithAMarker = compose(
             key={marker.id}
             onClick={onClick}
             position={marker.position}
+            draggable={true}
+            onDragEnd={ (e) => props.onMarkerDragEnd(marker.id, e) }
           >
           </Marker>
         )
@@ -258,12 +275,12 @@ export default class ShelterMap extends Component {
         containerElement={<div style={{ height: `400px` }} />}
         mapElement={<div style={{ height: `100%` }} />}
       />
-
         {this.state.markers.map((place) => (
           <li>
           <ul key={place.id}>{place.address_components.short_name}</ul>
           <button
           type="button"
+          
           onClick={() => this.onRemoveMarker(place.id)}
         >
           Remove
@@ -275,6 +292,57 @@ export default class ShelterMap extends Component {
     )
   }
 }
+
+
+// class MapContainer extends React.Component {
+//   state = {
+//     markers: [
+//       {
+//         name: "Current position",
+//         position: {
+//           lat: 37.77,
+//           lng: -122.42
+//         }
+//       }
+//     ]
+//   };
+
+//   onMarkerDragEnd = (coord, index) => {
+//     const { latLng } = coord;
+//     const lat = latLng.lat();
+//     const lng = latLng.lng();
+
+//     this.setState(prevState => {
+//       const markers = [...this.state.markers];
+//       markers[index] = { ...markers[index], position: { lat, lng } };
+//       return { markers };
+//     });
+//   };
+
+//   render() {
+//     return (
+//       <Map
+//         google={this.props.google}
+//         style={{
+//           width: "100%",
+//           height: "300px"
+//         }}
+//         zoom={14}
+//       >
+//         {this.state.markers.map((marker, index) => (
+//           <Marker
+//             position={marker.position}
+//             draggable={true}
+//             onDragend={(t, map, coord) => this.onMarkerDragEnd(coord, index)}
+//             name={marker.name}
+//           />
+//         ))}
+//       </Map>
+//     );
+//   }
+// }
+
+
 
 // /* global google */
 // import React, { Component } from "react";
