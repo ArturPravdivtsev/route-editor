@@ -25,6 +25,7 @@
     ],
     "devDependencies": {
         "google-map-react": "^1.1.2",
+        "google-maps": "^3.3.0",
         "google-maps-react": "^2.0.2",
         "lodash.isempty": "^4.4.0",
         "mobx": "^5.9.0",
