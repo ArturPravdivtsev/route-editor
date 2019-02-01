@@ -8,7 +8,8 @@ const {
   withGoogleMap,
   GoogleMap,
   Marker,
-  InfoWindow
+  InfoWindow,
+  Polyline
 } = require("react-google-maps");
 const { SearchBox } = require("react-google-maps/lib/components/places/SearchBox");
 
@@ -67,9 +68,9 @@ const MapWithAMarker = compose(
         },
         onRemoveMarker: id => {
           this.setState(state => {
-            const markers = state.markers.filter(marker => marker.id !== id);
+            const nexttMarkers = state.nexttMarkers.filter(marker => marker.id !== id);
             return {
-              markers,
+              nexttMarkers,
             };
           });
         },
@@ -181,6 +182,10 @@ const MapWithAMarker = compose(
       // <Marker key={index} position={marker.position} />
     )}
     </GoogleMap>
+    <Polyline path={props.nexttMarkers.map((marker) => (
+      {lat: marker.position.lat(), lng:marker.position.lng()}
+    ))}/>
+    <Polyline path={[{ lat: -34.397, lng: 150.644 }, { lat: -35.397, lng: 151.644 }]}/>
     {props.nexttMarkers.map((marker, index) => (
           <li>
           <ul>{marker.name}</ul>
