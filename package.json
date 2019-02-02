@@ -24,13 +24,18 @@
         "not op_mini all"
     ],
     "devDependencies": {
+        "@blueprintjs/core": "^3.12.0",
+        "@blueprintjs/docs-theme": "^3.0.4",
+        "@material/button": "^0.43.0",
         "array-move": "^1.0.0",
+        "bootstrap": "^4.2.1",
         "google-map-react": "^1.1.2",
         "google-maps": "^3.3.0",
         "google-maps-react": "^2.0.2",
         "lodash.isempty": "^4.4.0",
         "mobx": "^5.9.0",
         "mobx-react": "^5.4.3",
+        "react-bootstrap": "^1.0.0-beta.5",
         "react-compose": "^2.0.0",
         "react-geocode": "^0.1.2",
         "react-google-autocomplete": "^1.0.18",

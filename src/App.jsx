@@ -1,8 +1,10 @@
 /* global google*/
 import React, { Component,Fragment } from "react";
 import {sortableContainer, sortableElement} from 'react-sortable-hoc';
+import { Icon, Button } from "@blueprintjs/core";
+import "./App.css";
 const _ = require("lodash");
-const { compose, withProps, lifecycle } = require("recompose");
+const { compose, lifecycle } = require("recompose");
 const {
   withScriptjs,
   withGoogleMap,
@@ -13,13 +15,12 @@ const {
 } = require("react-google-maps");
 const { SearchBox } = require("react-google-maps/lib/components/places/SearchBox");
 
-const SortableItem = sortableElement(({value}) => <li>{value}</li>);
+const SortableItem = sortableElement(({value}) => <li class="noselect"><Icon className="icon" icon="drag-handle-horizontal" iconSize={30} />{value.name}</li>);
 const SortableContainer = sortableContainer(({children}) => {
   return <ul>{children}</ul>;
 });
 
 const MapWithAMarker = compose(
-  
   withScriptjs, withGoogleMap, 
   lifecycle({
     componentWillMount() {
@@ -122,82 +123,79 @@ const MapWithAMarker = compose(
   }),
   )(props => {
   return (
-    <div>
-    <GoogleMap 
-    selectedMarker={props.selectedMarker}
-    defaultZoom={7}
-    defaultCenter={{ lat: 29.5, lng: -95 }}
-    ref={props.onMapMounted}
-    onClick={props.onMapClicked}
-    onBoundsChanged={props.onBoundsChanged}
-    googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGe5vjL8wBmilLzoJ0jNIwe9SAuH2xS_0&libraries=places"
-    >
-    <SearchBox
-      ref={props.onSearchBoxMounted}
-      bounds={props.bounds}
-      controlPosition={google.maps.ControlPosition.TOP_LEFT}
-      onPlacesChanged={props.onPlacesChanged}
-    >
-      <input
-        type="text"
-        placeholder="Customized your placeholder"
-        style={{
-          boxSizing: `border-box`,
-          border: `1px solid transparent`,
-          width: `240px`,
-          height: `32px`,
-          marginTop: `27px`,
-          padding: `0 12px`,
-          borderRadius: `3px`,
-          boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
-          fontSize: `14px`,
-          outline: `none`,
-          textOverflow: `ellipses`,
-        }}
-      />
-    </SearchBox>
-      {props.nexttMarkers.map((marker, index) =>
-      {
-        const onClick = props.onClick.bind(this, marker)
-        return (
-          <Marker
-            ref={props.onMarkerMounted}
-            key={marker.id}
-            onClick={onClick}
-            position={marker.position}
-            draggable={true}
-            onDragEnd={ (e) => props.onMarkerDragEnd(marker.id, e) }
+    <Fragment>
+          <GoogleMap 
+            selectedMarker={props.selectedMarker}
+            defaultZoom={7}
+            defaultCenter={{ lat: 29.5, lng: -95 }}
+            ref={props.onMapMounted}
+            onClick={props.onMapClicked}
+            onBoundsChanged={props.onBoundsChanged}
+            googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGe5vjL8wBmilLzoJ0jNIwe9SAuH2xS_0&libraries=places"
           >
-            {props.selectedMarker === marker &&
-              <InfoWindow>
-                <div>
-                  {marker.name}
-                </div>
-              </InfoWindow>
+            <SearchBox
+              ref={props.onSearchBoxMounted}
+              bounds={props.bounds}
+              controlPosition={google.maps.ControlPosition.TOP_LEFT}
+              onPlacesChanged={props.onPlacesChanged}
+            >
+              <input
+                type="text"
+                placeholder="Введите название"
+                style={{
+                  boxSizing: `border-box`,
+                  border: `1px solid transparent`,
+                  width: `240px`,
+                  height: `32px`,
+                  marginTop: `27px`,
+                  padding: `0 12px`,
+                  borderRadius: `3px`,
+                  boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+                  fontSize: `14px`,
+                  outline: `none`,
+                  textOverflow: `ellipses`,
+                }}
+            />
+          </SearchBox>
+          {props.nexttMarkers.map((marker, index) =>
+            {
+              const onClick = props.onClick.bind(this, marker)
+              return (
+                <Marker
+                  ref={props.onMarkerMounted}
+                  key={marker.id}
+                  onClick={onClick}
+                  position={marker.position}
+                  draggable={true}
+                  onDragEnd={ (e) => props.onMarkerDragEnd(marker.id, e) }
+                >
+                  {props.selectedMarker === marker &&
+                    <InfoWindow>
+                      <div>
+                        {marker.name}
+                      </div>
+                    </InfoWindow>
+                  }
+                </Marker>
+              )
             }
-          </Marker>
-        )
-      }
-    )}
-    </GoogleMap>
-    <Polyline path={props.nexttMarkers.map((marker) => (
-      {lat: marker.position.lat(), lng:marker.position.lng()}
+          )}
+          </GoogleMap>
+          <Polyline path={props.nexttMarkers.map((marker) => (
+            {lat: marker.position.lat(), lng:marker.position.lng()}
     ))}/>
-    <Polyline path={[{ lat: -34.397, lng: 150.644 }, { lat: -35.397, lng: 151.644 }]}/>
     <SortableContainer onSortEnd={props.onSortEnd}>
         {props.nexttMarkers.map((marker, index) => (
-          <Fragment>
-          <SortableItem key={`item-${index}`} index={index} value={marker.name} />
-          <button
-          type="button"
-          onClick={(index) => props.onRemoveMarker(marker.id)}
-        >
-          Remove
-        </button>
-        </Fragment>
+          <div class="row">
+          <SortableItem key={`item-${index}`} index={index} value={marker} />
+          <Button
+            icon="delete"
+            onClick={(index) => props.onRemoveMarker(marker.id)}
+          ></Button>
+          </div>
         ))}
-      </SortableContainer>
-    </div>
+          </SortableContainer>
+    </Fragment>
   )
 })
 
@@ -227,7 +225,7 @@ export default class ShelterMap extends Component {
         //onClick={this.handleClick}
         googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGe5vjL8wBmilLzoJ0jNIwe9SAuH2xS_0&libraries=places"
         loadingElement={<div style={{ height: `100%` }} />}
-        containerElement={<div style={{ height: `400px` }} />}
+        containerElement={<div style={{ height: `300px`, width: `100%` }} />}
         mapElement={<div style={{ height: `100%` }} />}
       />      
       </div>
