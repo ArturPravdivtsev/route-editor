@@ -1,6 +1,6 @@
 /* global google*/
-import React, { Component } from "react";
-import Geocode from "react-geocode";
+import React, { Component,Fragment } from "react";
+import {sortableContainer, sortableElement} from 'react-sortable-hoc';
 const _ = require("lodash");
 const { compose, withProps, lifecycle } = require("recompose");
 const {
@@ -13,7 +13,10 @@ const {
 } = require("react-google-maps");
 const { SearchBox } = require("react-google-maps/lib/components/places/SearchBox");
 
-
+const SortableItem = sortableElement(({value}) => <li>{value}</li>);
+const SortableContainer = sortableContainer(({children}) => {
+  return <ul>{children}</ul>;
+});
 
 const MapWithAMarker = compose(
   
@@ -27,6 +30,7 @@ const MapWithAMarker = compose(
           lat: 41.9, lng: -87.624
         },
         nexttMarkers: [],
+        selectedMarker: false,
         onMapMounted: ref => {
           refs.map = ref;
         },
@@ -42,7 +46,6 @@ const MapWithAMarker = compose(
         onPlacesChanged: () => {
           const places = refs.searchBox.getPlaces();
           const bounds = new google.maps.LatLngBounds();
-
           
           places.forEach(place => {
             if (place.geometry.viewport) {
@@ -56,10 +59,8 @@ const MapWithAMarker = compose(
             id: place.id,
             name: place.formatted_address,
           }));
-          console.log(this.state.nextMarkers)
           const nextCenter = _.get(nextMarkers, '0.position', this.state.center);
-          this.state.nexttMarkers = nextMarkers.concat(this.state.nexttMarkers)
-          console.log(this.state.nexttMarkers)
+          this.state.nexttMarkers = this.state.nexttMarkers.concat(nextMarkers)
           this.setState({
             center: nextCenter,
             markers: this.state.nexttMarkers,
@@ -79,7 +80,6 @@ const MapWithAMarker = compose(
           var geocoder = new google.maps.Geocoder();
            let newLat = e.latLng.lat(),
              newLng = e.latLng.lng();
-          //let position = e.latLng.toString();
             var latlng = { lat: parseFloat(newLat), lng: parseFloat(newLng)};
               const index = this.state.markers.findIndex((marker) => {
                 return marker.id === id
@@ -101,18 +101,21 @@ const MapWithAMarker = compose(
                   }
                 }
               })
-
-              // marker.position = new google.maps.LatLng(newLat, newLng)
-
-              // console.log(marker)
-              // const markerss = Object.assign([], this.state.markers);
-              // console.log(markerss[index].position.lat())
-              // markerss[index] = marker;
-              // console.log(markerss[index].position.lat())
-              // this.setState({
-              //   markers: markerss
-              // } )
         },
+
+        onSortEnd: ({oldIndex, newIndex}) => {
+          const markerss = Object.assign([], this.state.nexttMarkers);
+          const tmp = markerss[oldIndex];
+          markerss[oldIndex] = markerss[newIndex];
+          markerss[newIndex] = tmp;
+          this.setState({
+            nexttMarkers: markerss,
+          });
+        },
+
+         onClick: (marker, event) => {
+          this.setState({ selectedMarker: marker })
+        }
       },
       )
     },
@@ -121,6 +124,7 @@ const MapWithAMarker = compose(
   return (
     <div>
     <GoogleMap 
+    selectedMarker={props.selectedMarker}
     defaultZoom={7}
     defaultCenter={{ lat: 29.5, lng: -95 }}
     ref={props.onMapMounted}
@@ -152,18 +156,6 @@ const MapWithAMarker = compose(
         }}
       />
     </SearchBox>
-      {/* {props.markers.map(marker => {
-        const onClick = props.onClick.bind(this, marker)
-        return (
-          <Marker
-            ref={props.onMarkerMounted}
-            key={marker.id}
-            onClick={onClick}
-            position={{ lat: marker.latitude, lng: marker.longitude }}
-          >
-          </Marker>
-        )
-      })} */}
       {props.nexttMarkers.map((marker, index) =>
       {
         const onClick = props.onClick.bind(this, marker)
@@ -176,27 +168,35 @@ const MapWithAMarker = compose(
             draggable={true}
             onDragEnd={ (e) => props.onMarkerDragEnd(marker.id, e) }
           >
+            {props.selectedMarker === marker &&
+              <InfoWindow>
+                <div>
+                  {marker.name}
+                </div>
+              </InfoWindow>
+            }
           </Marker>
         )
       }
-      // <Marker key={index} position={marker.position} />
     )}
     </GoogleMap>
     <Polyline path={props.nexttMarkers.map((marker) => (
       {lat: marker.position.lat(), lng:marker.position.lng()}
     ))}/>
     <Polyline path={[{ lat: -34.397, lng: 150.644 }, { lat: -35.397, lng: 151.644 }]}/>
-    {props.nexttMarkers.map((marker, index) => (
-          <li>
-          <ul>{marker.name}</ul>
+    <SortableContainer onSortEnd={props.onSortEnd}>
+        {props.nexttMarkers.map((marker, index) => (
+          <Fragment>
+          <SortableItem key={`item-${index}`} index={index} value={marker.name} />
           <button
           type="button"
           onClick={(index) => props.onRemoveMarker(marker.id)}
         >
           Remove
         </button>
-        </li>
+        </Fragment>
         ))}
+      </SortableContainer>
     </div>
   )
 })
@@ -212,109 +212,24 @@ export default class ShelterMap extends Component {
       markers: [],
       selectedMarker: false
     }
-
-    this.onMarkerMounted = element => {
-      this.setState(prevState => ({
-        markerObjects: [...prevState.markerObjects, element.marker]
-      }))
-    };
   }
 
-  onChangeValue = event => {
-    this.setState({ value: event.target.value });
-  };
-
-  onAddMarker = () => {
-    // not allowed AND not working
-    this.setState(state => {
-      const markers = state.markers.push(state.value);
-      return {
-        markers,
-        value: '',
-      };
-    });
-  };
-
-  onRemoveMarker = id => {
-    this.setState(state => {
-      const markers = state.markers.filter(shelters => shelters.id !== id);
-      return {
-        markers,
-      };
-    });
-  };
-
-
-  // componentDidMount() {
-  //   fetch("https://api.harveyneeds.org/api/v1/shelters?limit=20")
-  //     .then(r => r.json())
-  //     .then(data => {
-  //       this.setState({ markers: data.shelters })
-  //     })
+  // handleClick = (marker, event) => {
+  //   this.setState({ selectedMarker: marker })
   // }
 
-  handleClick = (marker, event) => {
-    // console.log({ marker })
-    this.setState({ selectedMarker: marker })
-  }
-
-  // apiHasLoaded = (map, maps) => {
-  //   this.setState({
-  //     mapApiLoaded: true,
-  //     mapInstance: map,
-  //     mapApi: maps,
-  //   });
-  // };
-
-  addPlace = (place) => {
-    this.setState({ places: place });
-  };
-
-  onMapClicked = props => {
-    if (this.state.showingInfoWindow) {
-      this.setState({
-        showingInfoWindow: false,
-        activeMarker: null
-      });
-    }
-  };
-
-  addMarker = (mapProps, map) => {
-    var marker = new google.maps.Marker({
-      position: {},
-      map: map
-    });
-  };
-  
-
   render() {
-    // const { mapInstance, mapApi,
-    // } = this.state;
     return (
       <div>
-      {/* <SearchBox map={mapInstance} mapApi={mapApi} addplace={this.addPlace} /> */}
       <MapWithAMarker
         selectedMarker={this.state.selectedMarker}
         markers={this.state.markers}
-        onClick={this.handleClick}
+        //onClick={this.handleClick}
         googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGe5vjL8wBmilLzoJ0jNIwe9SAuH2xS_0&libraries=places"
         loadingElement={<div style={{ height: `100%` }} />}
         containerElement={<div style={{ height: `400px` }} />}
         mapElement={<div style={{ height: `100%` }} />}
-      />
-        {this.state.markers.map((place) => (
-          <li>
-          <ul key={place.id}>{place.address_components.short_name}</ul>
-          <button
-          type="button"
-          
-          onClick={() => this.onRemoveMarker(place.id)}
-        >
-          Remove
-        </button>
-        </li>
-        ))}
-      
+      />      
       </div>
     )
   }
