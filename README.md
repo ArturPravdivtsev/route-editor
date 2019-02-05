@@ -1,6 +1,6 @@
 Этот проект был запущен с использованием [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+##  Инструкция
 
 В корневом каталоге нужно запустить:
 
