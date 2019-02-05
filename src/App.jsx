@@ -115,6 +115,9 @@ export const MapWithAMarker = compose(
         },
 
          onClick: (marker, event) => {
+           if(this.state.selectedMarker){
+            this.setState({ selectedMarker: false })
+           } else
           this.setState({ selectedMarker: marker })
         }
       },
@@ -125,7 +128,7 @@ export const MapWithAMarker = compose(
   return (
     <Fragment>
           <GoogleMap 
-            selectedMarker={props.selectedMarker}
+            selectedMarker={false}
             defaultZoom={7}
             defaultCenter={{ lat: 29.5, lng: -95 }}
             ref={props.onMapMounted}
@@ -203,18 +206,14 @@ export default class RouteEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: '',
       markers: [],
-      selectedMarker: false
     }
   }
+
   render() {
     return (
       <div>
       <MapWithAMarker
-        selectedMarker={this.state.selectedMarker}
-        markers={this.state.markers}
-        //onClick={this.handleClick}
         googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGe5vjL8wBmilLzoJ0jNIwe9SAuH2xS_0&libraries=places"
         loadingElement={<div style={{ height: `100%` }} />}
         containerElement={<div style={{ height: `300px`, width: `100%` }} />}

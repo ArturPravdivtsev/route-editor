@@ -9,8 +9,6 @@ import RouteEditor from '../App';
 import SortableItem from '../App';
 import SortableContainer from '../App';
 
-const willMount = sinon.spy();
-
 configure({ adapter: new Adapter() });
 
 it('renders without crashing', () => {
@@ -20,14 +18,26 @@ it('renders without crashing', () => {
 });
 
 it('renders RouteEditor without crashing', () => {
-  shallow(<RouteEditor />);
+  const wrapper = shallow(<RouteEditor />);
+  expect(wrapper).toMatchSnapshot();
 });
 
 it('renders SortableItem without crashing', () => {
-  shallow(<SortableItem />);
+  const wrapper = shallow(<SortableItem />);
+  expect(wrapper).toMatchSnapshot();
 });
 
 it('renders SortableContainer without crashing', () => {
-  shallow(<SortableContainer />);
+  const wrapper = shallow(<SortableContainer />);
+  expect(wrapper).toMatchSnapshot();
 });
 
+const markers = [
+  { id: 1, name: 'Moscow'}
+];
+
+it('Render SortableContainer must contain 1 point', () => {
+  const wrapper = mount(<SortableContainer nexttMarkers={markers} />);
+  const listPoints = wrapper.find(SortableItem);
+  expect(listPoints.length).toBe(1);
+});
