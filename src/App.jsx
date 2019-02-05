@@ -15,12 +15,12 @@ const {
 } = require("react-google-maps");
 const { SearchBox } = require("react-google-maps/lib/components/places/SearchBox");
 
-const SortableItem = sortableElement(({value}) => <li class="noselect"><Icon className="icon" icon="drag-handle-horizontal" iconSize={30} />{value.name}</li>);
-const SortableContainer = sortableContainer(({children}) => {
+export const SortableItem = sortableElement(({value}) => <li class="noselect"><Icon className="icon" icon="drag-handle-horizontal" iconSize={30} />{value.name}</li>);
+export const SortableContainer = sortableContainer(({children}) => {
   return <ul>{children}</ul>;
 });
 
-const MapWithAMarker = compose(
+export const MapWithAMarker = compose(
   withScriptjs, withGoogleMap, 
   lifecycle({
     componentWillMount() {
@@ -199,23 +199,15 @@ const MapWithAMarker = compose(
   )
 })
 
-export default class ShelterMap extends Component {
+export default class RouteEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      mapApiLoaded: false,
-      mapInstance: null,
-      mapApi: null,
       value: '',
       markers: [],
       selectedMarker: false
     }
   }
-
-  // handleClick = (marker, event) => {
-  //   this.setState({ selectedMarker: marker })
-  // }
-
   render() {
     return (
       <div>
