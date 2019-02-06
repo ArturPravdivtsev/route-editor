@@ -3,7 +3,6 @@ import React, { Component,Fragment } from "react";
 import {sortableContainer, sortableElement} from 'react-sortable-hoc';
 import { Icon, Button } from "@blueprintjs/core";
 import "./App.css";
-const _ = require("lodash");
 const { compose, lifecycle } = require("recompose");
 const {
   withScriptjs,
@@ -13,7 +12,6 @@ const {
   InfoWindow,
   Polyline
 } = require("react-google-maps");
-const { SearchBox } = require("react-google-maps/lib/components/places/SearchBox");
 
 export const SortableItem = sortableElement(({value}) => <li class="noselect"><Icon className="icon" icon="drag-handle-horizontal" iconSize={30} />{value.name}</li>);
 export const SortableContainer = sortableContainer(({children}) => {
@@ -31,6 +29,7 @@ export const MapWithAMarker = compose(
           lat: 41.9, lng: -87.624
         },
         nexttMarkers: [],
+        inputText: '',
         selectedMarker: false,
         onMapMounted: ref => {
           refs.map = ref;
@@ -44,30 +43,7 @@ export const MapWithAMarker = compose(
         onSearchBoxMounted: ref => {
           refs.searchBox = ref;
         },
-        onPlacesChanged: () => {
-          const places = refs.searchBox.getPlaces();
-          const bounds = new google.maps.LatLngBounds();
-          
-          places.forEach(place => {
-            if (place.geometry.viewport) {
-              bounds.union(place.geometry.viewport)
-            } else {
-              bounds.extend(place.geometry.location)
-            }
-          });
-          const nextMarkers = places.map(place => ({
-            position: place.geometry.location,
-            id: place.id,
-            name: place.formatted_address,
-          }));
-          const nextCenter = _.get(nextMarkers, '0.position', this.state.center);
-          this.state.nexttMarkers = this.state.nexttMarkers.concat(nextMarkers)
-          this.setState({
-            center: nextCenter,
-            markers: this.state.nexttMarkers,
-          });
-           refs.map.fitBounds(bounds);
-        },
+        
         onRemoveMarker: id => {
           this.setState(state => {
             const nexttMarkers = state.nexttMarkers.filter(marker => marker.id !== id);
@@ -91,7 +67,7 @@ export const MapWithAMarker = compose(
                 if (status === 'OK') {
                   if (results[0]) {
                     marker.position = new google.maps.LatLng(newLat, newLng);
-                    marker.name = results[0].formatted_address;
+                    //marker.name = results[0].formatted_address;
                     markerss[index] = marker;
                     console.log(markerss[index])
                     this.setState({
@@ -119,6 +95,30 @@ export const MapWithAMarker = compose(
             this.setState({ selectedMarker: false })
            } else
           this.setState({ selectedMarker: marker })
+        },
+
+        handleInputChange: ({ target: { value } }) => {
+          this.setState({
+            inputText: value,
+          })
+        },
+
+        onKeyPress: (e, index) => {
+          if(e.key === 'Enter'){
+            const place = this.state.inputText;
+
+            const nextMarkers = ({
+              position: this.state.center,
+              id: this.state.center+place,
+              name: place,
+            });
+            const nextCenter = this.state.center;
+            this.state.nexttMarkers = this.state.nexttMarkers.concat(nextMarkers)
+            this.setState({
+              center: nextCenter,
+              markers: this.state.nexttMarkers,
+            });
+          }
         }
       },
       )
@@ -127,6 +127,25 @@ export const MapWithAMarker = compose(
   )(props => {
   return (
     <Fragment>
+      <input type="text" 
+              name="marker" 
+              value={props.inputText} 
+              onChange={props.handleInputChange} 
+              onKeyPress={props.onKeyPress}
+              style={{
+                boxSizing: `border-box`,
+                border: `1px solid transparent`,
+                width: `240px`,
+                height: `32px`,
+                marginTop: `27px`,
+                padding: `0 12px`,
+                borderRadius: `3px`,
+                boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+                fontSize: `14px`,
+                outline: `none`,
+                textOverflow: `ellipses`,
+              }}
+      />
           <GoogleMap 
             selectedMarker={false}
             defaultZoom={7}
@@ -136,30 +155,6 @@ export const MapWithAMarker = compose(
             onBoundsChanged={props.onBoundsChanged}
             googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGe5vjL8wBmilLzoJ0jNIwe9SAuH2xS_0&libraries=places"
           >
-            <SearchBox
-              ref={props.onSearchBoxMounted}
-              bounds={props.bounds}
-              controlPosition={google.maps.ControlPosition.TOP_LEFT}
-              onPlacesChanged={props.onPlacesChanged}
-            >
-              <input
-                type="text"
-                placeholder="Введите название"
-                style={{
-                  boxSizing: `border-box`,
-                  border: `1px solid transparent`,
-                  width: `240px`,
-                  height: `32px`,
-                  marginTop: `27px`,
-                  padding: `0 12px`,
-                  borderRadius: `3px`,
-                  boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
-                  fontSize: `14px`,
-                  outline: `none`,
-                  textOverflow: `ellipses`,
-                }}
-            />
-          </SearchBox>
           {props.nexttMarkers.map((marker, index) =>
             {
               const onClick = props.onClick.bind(this, marker)
